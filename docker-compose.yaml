@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   airflow_postgres:
-    image: postgres:latest
+    image: postgres:latest        
     networks:
       - ml_network
     environment:
@@ -12,7 +12,7 @@ services:
       - POSTGRES_DB=airflow
 
 
-  airflow-init:
+  airflow-init:       
     image: apache/airflow:2.8.1
     depends_on:
       - airflow_postgres
@@ -21,13 +21,11 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
     command: >
-      bash -c "airflow db init && airflow db migrate && airflow users create --username airflow --password password --firstname John --lastname Doe --role Admin --email admin@example.com"
+      bash -c "airflow db init && airflow db migrate && airflow users create --username airflow --password airflow --firstname John --lastname Doe --role Admin --email admin@example.com"
 
 
   webserver:
-    build:
-      context: ./airflow
-      dockerfile: Dockerfile
+    image: apache/airflow:2.8.1
     user: root
     depends_on:
       - airflow-init
@@ -48,9 +46,9 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
       - AIRFLOW__CORE__FERNET_KEY=''
       - AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME=airflow
-      - AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD=password
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD=airflow
       - AIRFLOW_WWW_USER_USERNAME=airflow
-      - AIRFLOW_WWW_USER_PASSWORD=password
+      - AIRFLOW_WWW_USER_PASSWORD=airflow
       - AIRFLOW__WEBSERVER__SECRET_KEY=secret
     ports:
       - "8080:8080"
@@ -58,9 +56,7 @@ services:
 
 
   scheduler:
-    build:
-      context: ./airflow
-      dockerfile: Dockerfile
+    image: apache/airflow:2.8.1
     user: root
     depends_on:
       - airflow_postgres
@@ -81,11 +77,10 @@ services:
       - EXECUTOR=Local
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
       - AIRFLOW__CORE__FERNET_KEY=''
-      - AIRFLOW__WEBSERVER__SECRET_KEY=secret
       - AIRFLOW_WWW_USER_USERNAME=airflow
-      - AIRFLOW_WWW_USER_PASSWORD=password
+      - AIRFLOW_WWW_USER_PASSWORD=airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=secret
     command: scheduler
-
 
 
 networks:
@@ -93,6 +88,4 @@ networks:
     driver: bridge
 
 
-
 # volumes:
-  
